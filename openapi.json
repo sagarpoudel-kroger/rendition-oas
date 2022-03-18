@@ -1,0 +1,542 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DRAFT: Core Rendition",
+    "description": "The Core Rendition Service is designed to accept image and compute the renditions on the original image as per\nthe specifications provided in the input and returns the rendition image in the response.",
+    "version": "0.0.1",
+    "contact": {
+      "name": "DAP Team",
+      "email": "sagar.poudel@kroger.com",
+      "url": "https://confluence.kroger.com/confluence/x/voHQBQ"
+    },
+    "termsOfService": "https://developer.kroger.com/terms",
+    "license": {
+      "name": "LICENSED",
+      "url": "https://developer.kroger.com/license"
+    }
+  },
+  "externalDocs": {
+    "description": "Core Rendition service design and development plan for MVP product",
+    "url": "https://confluence.kroger.com/confluence/x/aSogDg"
+  },
+  "servers": [
+    {
+      "url": "https://api.kroger.com/core-rendition/v1",
+      "description": "Example server URL. This is not actually live"
+    }
+  ],
+  "paths": {
+    "/transforms": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/accept-language"
+        },
+        {
+          "$ref": "#/components/parameters/x-correlation-id"
+        },
+        {
+          "$ref": "#/components/parameters/x-kroger-tenant"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Transforms"
+        ],
+        "summary": "Transform the given image",
+        "description": "The Transform API allows users to send an image and apply various transformations such as\nresizing, changing of color palette etc.",
+        "parameters": [
+          {
+            "name": "filter.id",
+            "in": "query",
+            "description": "The id of the image that the renditions or transformations need to be based upon",
+            "example": "29a9eb98-5cc8-4041-a76a-195de76c840c",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/renditions.postRequestPayloadModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "CREATED",
+            "headers": {
+              "Content-Type": {
+                "$ref": "#/components/headers/content-type"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/content-language"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/correlation-id"
+              },
+              "X-Record-Count": {
+                "$ref": "#/components/headers/record-count"
+              },
+              "X-Kroger-Records-Affected": {
+                "schema": {
+                  "type": "integer",
+                  "example": "1",
+                  "description": "Total number of renditions created for that particular image id"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/transforms.successful.okArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/renditions.clientError.badRequest"
+                }
+              }
+            },
+            "headers": {
+              "Content-Type": {
+                "$ref": "#/components/headers/content-type"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/content-language"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/correlation-id"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/renditions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/accept-language"
+        },
+        {
+          "$ref": "#/components/parameters/x-correlation-id"
+        },
+        {
+          "$ref": "#/components/parameters/x-kroger-tenant"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Renditions"
+        ],
+        "summary": "Get Renditions",
+        "description": "The Renditions API allows users to retrieve all the present renditions for a given image id",
+        "parameters": [
+          {
+            "name": "filter.id",
+            "in": "query",
+            "description": "The id of the image that the renditions or transformations need to be based upon",
+            "example": "29a9eb98-5cc8-4041-a76a-195de76c840c",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Content-Type": {
+                "$ref": "#/components/headers/content-type"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/content-language"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/correlation-id"
+              },
+              "X-Record-Count": {
+                "$ref": "#/components/headers/record-count"
+              },
+              "X-Kroger-Records-Affected": {
+                "schema": {
+                  "type": "integer",
+                  "example": "3",
+                  "description": "Total number of renditions present for that particular image id"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/renditions.successful.okArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/renditions.clientError.badRequest"
+                }
+              }
+            },
+            "headers": {
+              "Content-Type": {
+                "$ref": "#/components/headers/content-type"
+              },
+              "Content-Language": {
+                "$ref": "#/components/headers/content-language"
+              },
+              "X-Correlation-Id": {
+                "$ref": "#/components/headers/correlation-id"
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "errorModel": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "code",
+            "reason",
+            "datetime"
+          ],
+          "properties": {
+            "rootCauses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "reason",
+                  "datetime"
+                ]
+              },
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "The service-generated error code.",
+                  "example": "xqr-89-rts-01"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "The description of the error and any action(s) to take.",
+                  "example": "The service did not respond. Try again or contact support."
+                },
+                "datetime": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "timezone"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "example": "YYYY-MM-DDTHH:MM:SSZ"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "example": "UTC"
+                    }
+                  }
+                }
+              }
+            },
+            "code": {
+              "type": "string",
+              "description": "The service-generated error code, representing the overall error.",
+              "example": "DAP-1001"
+            },
+            "reason": {
+              "type": "string",
+              "description": "The overall description of the error and any action(s) to take.",
+              "example": "This request has the same Idempotency-Key value as a previous request. Check the request and, if you'd like to retry, update the Idempotency-Key value."
+            },
+            "datetime": {
+              "type": "object",
+              "required": [
+                "value",
+                "timezone"
+              ],
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "example": "YYYY-MM-DDTHH:MM:SSZ"
+                },
+                "timezone": {
+                  "type": "string",
+                  "example": "UTC"
+                }
+              }
+            }
+          }
+        }
+      },
+      "metaModel": {
+        "type": "object",
+        "additionalProperties": true,
+        "minProperties": 1,
+        "description": "Information about the resources returned in the data section.",
+        "properties": {
+          "page": {
+            "type": "object",
+            "description": "If page is present, the following are required to communicate relevant pagination metadata.",
+            "required": [
+              "offset",
+              "size"
+            ],
+            "properties": {
+              "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "example": 0
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1,
+                "example": 50
+              }
+            }
+          }
+        }
+      },
+      "renditions.clientError.badRequest": {
+        "type": "object",
+        "description": "Info",
+        "properties": {
+          "errors": {
+            "$ref": "#/components/schemas/errorModel"
+          }
+        }
+      },
+      "renditions.successful.okArray": {
+        "type": "object",
+        "description": "Owner information returned on a successful request.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/renditions.responsePayloadModel"
+            }
+          }
+        }
+      },
+      "renditions.postRequestPayloadModel": {
+        "type": "object",
+        "description": "Data model for sample request to create transform renditions",
+        "properties": {
+          "resize": {
+            "type": "object",
+            "description": "Container for height and width of the desired transformation",
+            "properties": {
+              "height": {
+                "type": "number",
+                "description": "the desired height of the output transformation",
+                "example": 1000
+              },
+              "width": {
+                "type": "number",
+                "description": "the desired width of the output transformation",
+                "example": 500
+              }
+            }
+          },
+          "colorPalette": {
+            "type": "string",
+            "description": "the desired color palette of the output transformation",
+            "example": "CMYK"
+          },
+          "fileFormat": {
+            "type": "string",
+            "description": "the desired file format of the output transformation",
+            "example": "JPEG"
+          }
+        }
+      },
+      "renditions.responsePayloadModel": {
+        "type": "object",
+        "description": "The rendition data model.",
+        "required": [
+          "id",
+          "versionKey",
+          "renditions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The server generated unique identifier for the rendition",
+            "example": "c9bfdb38-750e-4a8d-89f3-ba70f4a45514"
+          },
+          "versionKey": {
+            "type": "string",
+            "example": "77d263c7",
+            "description": "The current version of the owner."
+          },
+          "renditions": {
+            "type": "array",
+            "example": "[\n    {\n        \"id\": \"29a9eb98-5cc8-4041-a76a-195de76c840c\",\n        \"renditionUrl\": \"https://imp-imageretrieval-app-stage.dapapp.rch-cdc-cxnonprod.kroger.com/imp/asset/v2/images/29a9eb98-5cc8-4041-a76a-195de76c840c\"\n    },\n    {\n        \"id\": \"a9bfdb38-750e-4a8d-89f3-ba70f4a45525\",\n        \"renditionUrl\": \"https://imp-imageretrieval-app-stage.dapapp.rch-cdc-cxnonprod.kroger.com/imp/asset/v2/images/a9bfdb38-750e-4a8d-89f3-ba70f4a45525\"\n    }\n ]",
+            "description": "all the renditions present for the image id",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "id",
+                "renditionUrl",
+                "datetime"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The id of the rendition that was created by the service",
+                  "example": "c9bfdb38-750e-4a8d-89f3-ba70f4a45514"
+                },
+                "renditionUrl": {
+                  "type": "string",
+                  "description": "The URL where the rendition resides and from where it can be downloaded",
+                  "example": "https://imp-imageretrieval-app-stage.dapapp.rch-cdc-cxnonprod.kroger.com/imp/asset/v2/images/29a9eb98-5cc8-4041-a76a-195de76c840c"
+                },
+                "datetime": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "timezone"
+                  ],
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "example": "YYYY-MM-DDTHH:MM:SSZ"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "example": "UTC"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "transforms.successful.okArray": {
+        "type": "object",
+        "description": "Transform information returned on a successful request",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/renditions.responsePayloadModel"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/metaModel"
+          }
+        }
+      }
+    },
+    "headers": {
+      "correlation-id": {
+        "description": "Used to enable tracing through the call stack.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "2db833ca-d336-4eac-8ef8-b136233f6b3f"
+        },
+        "required": true
+      },
+      "content-language": {
+        "description": "The language of the payload.",
+        "schema": {
+          "type": "string",
+          "default": "en-US"
+        },
+        "required": true
+      },
+      "record-count": {
+        "description": "The number of records returned in the response.",
+        "schema": {
+          "type": "string",
+          "example": "1"
+        }
+      },
+      "content-type": {
+        "description": "The type of content being returned",
+        "schema": {
+          "type": "string",
+          "example": "application/json"
+        }
+      }
+    },
+    "parameters": {
+      "accept-language": {
+        "in": "header",
+        "name": "Accept-Language",
+        "description": "The language or locale accepted by the client application.",
+        "schema": {
+          "type": "string",
+          "default": "en-US"
+        }
+      },
+      "authorization": {
+        "in": "header",
+        "name": "Authorization",
+        "description": "Basic or Bearer authorization token for OAuth2 services.",
+        "schema": {
+          "type": "string",
+          "default": "Bearer <token>"
+        },
+        "required": true
+      },
+      "x-correlation-id": {
+        "in": "header",
+        "name": "X-Correlation-ID ",
+        "description": "Used to enable tracing through the call stack.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "2db833ca-d336-4eac-8ef8-b136233f6b3f"
+        }
+      },
+      "x-authenticated-user-id": {
+        "in": "header",
+        "name": "X-Authenticated-UserId",
+        "description": "This header is used to pass the Customer Profile Service (CPS) GUID to called services.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "ec3a65be-5fe6-4a14-b1a0-57d1c4321902"
+        },
+        "required": true
+      },
+      "x-kroger-tenant": {
+        "in": "header",
+        "name": "X-Kroger-Tenant",
+        "description": "This value contains the unique identifier for a banner. This is required for ecommerce requests only.",
+        "schema": {
+          "type": "string",
+          "example": "kroger"
+        }
+      }
+    }
+  }
+}
